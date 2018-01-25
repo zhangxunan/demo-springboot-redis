@@ -3,6 +3,7 @@ package com.example.demospringbootredis.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisZSetCommands.Tuple;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
@@ -74,10 +75,7 @@ public class JedisClusterUtils {
     public static boolean saveNX(String key, String val) {
 
         /** 设置成功，返回 1 设置失败，返回 0 **/
-        return cacheUtils.redisTemplate.execute((RedisCallback<Boolean>) connection -> {
-            return connection.setNX(key.getBytes(), val.getBytes());
-        });
-
+        return cacheUtils.redisTemplate.execute((RedisCallback<Boolean>) connection -> connection.setNX(key.getBytes(), val.getBytes()));
     }
 
     /**
@@ -125,10 +123,10 @@ public class JedisClusterUtils {
     /**
      * 将递增浮点数存入缓存
      */
-    public static void saveFloat(String key, float data) {
+    public static Double saveFloat(String key, double data) {
 
         cacheUtils.redisTemplate.delete(key);
-        cacheUtils.redisTemplate.opsForValue().increment(key, data);
+        return cacheUtils.redisTemplate.opsForValue().increment(key, data);
     }
 
     /**
@@ -147,18 +145,16 @@ public class JedisClusterUtils {
      * 保存复杂类型数据到缓存（并设置失效时间）
      *
      * @param key
-     * @param Object
+     * @param obj
      * @param seconds
-     * @return
      */
     public static void saveBean(String key, Object obj, int seconds) {
-
         cacheUtils.redisTemplate.opsForValue().set(key, JSON.toJSONString(obj), seconds, TimeUnit.SECONDS);
     }
 
     /**
      * 功能: 存到指定的队列中<br />
-     * 左近右出<br\> 作者: 耿建委
+     * 左近右出
      *
      * @param key
      * @param val
@@ -179,10 +175,9 @@ public class JedisClusterUtils {
      *
      * @param hName 集合名
      * @param key
-     * @param val
+     * @param value
      */
     public static void hashSet(String hName, String key, String value) {
-
         cacheUtils.redisTemplate.opsForHash().put(hName, key, value);
     }
 
@@ -200,10 +195,10 @@ public class JedisClusterUtils {
     /**
      * 保存到hash集合中
      *
-     * @param <T>
      * @param hName 集合名
      * @param key
-     * @param val
+     * @param t
+     * @param <T>
      */
     public static <T> void hashSet(String hName, String key, T t) {
 
@@ -299,13 +294,7 @@ public class JedisClusterUtils {
      * @return
      */
     public static Long getSeqNext(String key, long value) {
-
-        return cacheUtils.redisTemplate.execute((RedisCallback<Long>) connection -> {
-
-            return connection.incrBy(key.getBytes(), value);
-
-        });
-
+        return cacheUtils.redisTemplate.execute((RedisConnection connection) -> connection.incrBy(key.getBytes(), value));
     }
 
     /**
@@ -345,11 +334,7 @@ public class JedisClusterUtils {
      */
     public static Double incrFloat(String key, double incrBy) {
 
-        return cacheUtils.redisTemplate.execute((RedisCallback<Double>) connection -> {
-
-            return connection.incrBy(key.getBytes(), incrBy);
-
-        });
+        return cacheUtils.redisTemplate.execute((RedisCallback<Double>) connection -> connection.incrBy(key.getBytes(), incrBy));
     }
 
     /**
@@ -360,9 +345,7 @@ public class JedisClusterUtils {
      */
     public static boolean isCached(String key) {
 
-        return cacheUtils.redisTemplate.execute((RedisCallback<Boolean>) connection -> {
-            return connection.exists(key.getBytes());
-        });
+        return cacheUtils.redisTemplate.execute((RedisCallback<Boolean>) connection -> connection.exists(key.getBytes()));
     }
 
     /**
@@ -374,9 +357,7 @@ public class JedisClusterUtils {
      */
     public static boolean hashCached(String hName, String key) {
 
-        return cacheUtils.redisTemplate.execute((RedisCallback<Boolean>) connection -> {
-            return connection.hExists(key.getBytes(), key.getBytes());
-        });
+        return cacheUtils.redisTemplate.execute((RedisCallback<Boolean>) connection -> connection.hExists(hName.getBytes(), key.getBytes()));
     }
 
     /**
@@ -388,15 +369,13 @@ public class JedisClusterUtils {
      */
     public static boolean isMember(String key, String val) {
 
-        return cacheUtils.redisTemplate.execute((RedisCallback<Boolean>) connection -> {
-            return connection.sIsMember(key.getBytes(), val.getBytes());
-        });
+        return cacheUtils.redisTemplate.execute((RedisCallback<Boolean>) connection -> connection.sIsMember(key.getBytes(), val.getBytes()));
     }
 
     /**
      * 从缓存中删除数据
      *
-     * @param string
+     * @param key
      * @return
      */
     public static void delKey(String key) {
@@ -451,9 +430,7 @@ public class JedisClusterUtils {
      */
     public static Set<Tuple> listSortedsetRev(String key, int start, int end) {
 
-        return cacheUtils.redisTemplate.execute((RedisCallback<Set<Tuple>>) connection -> {
-            return connection.zRevRangeWithScores(key.getBytes(), start, end);
-        });
+        return cacheUtils.redisTemplate.execute((RedisCallback<Set<Tuple>>) connection -> connection.zRevRangeWithScores(key.getBytes(), start, end));
     }
 
     /**
@@ -465,9 +442,7 @@ public class JedisClusterUtils {
      */
     public static Long getRankRev(String key, String member) {
 
-        return cacheUtils.redisTemplate.execute((RedisCallback<Long>) connection -> {
-            return connection.zRevRank(key.getBytes(), member.getBytes());
-        });
+        return cacheUtils.redisTemplate.execute((RedisCallback<Long>) connection -> connection.zRevRank(key.getBytes(), member.getBytes()));
 
     }
 
@@ -480,9 +455,7 @@ public class JedisClusterUtils {
      */
     public static Double getMemberScore(String key, String member) {
 
-        return cacheUtils.redisTemplate.execute((RedisCallback<Double>) connection -> {
-            return connection.zScore(key.getBytes(), member.getBytes());
-        });
+        return cacheUtils.redisTemplate.execute((RedisCallback<Double>) connection -> connection.zScore(key.getBytes(), member.getBytes()));
     }
 
     /**
@@ -547,9 +520,7 @@ public class JedisClusterUtils {
      */
     public static long incr(String key) {
 
-        return cacheUtils.redisTemplate.execute((RedisCallback<Long>) connection -> {
-            return connection.incr(key.getBytes());
-        });
+        return cacheUtils.redisTemplate.execute((RedisCallback<Long>) connection -> connection.incr(key.getBytes()));
     }
 
     /**

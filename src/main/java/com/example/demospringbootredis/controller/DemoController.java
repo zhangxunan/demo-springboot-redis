@@ -6,7 +6,6 @@ import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,7 +23,7 @@ public class DemoController {
     @ResponseBody
     @RequestMapping("/lock")
     public String lock(@RequestParam("sid") String serverId) {
-        Long counter = JedisClusterUtils.saveSeq("COUNTER", 1L);
+        Long counter = JedisClusterUtils.incr("COUNT");
         RLock lock = redissonClient.getLock("TEST");
         try {
             lock.lock();
