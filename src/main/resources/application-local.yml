@@ -1,0 +1,17 @@
+spring:
+  redis:
+    host: 192.168.31.163
+    database: 0
+    password:  #密码
+    port: 10086
+    timeout: 0
+    pool:
+      max-active: 8 #最大连接数
+      max-idle: 8 #最大空闲连接数
+      max-wait: -1 #最大等待时间
+      min-idle: 0
+    sentinel:
+      master: mymaster
+      nodes: 192.168.31.163:10001,192.168.31.163:10002,192.168.31.163:10003
+server:
+  port: 9090
