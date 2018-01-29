@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 
 @Component
 public class JedisClusterUtils {
+
     @Resource
     private RedisTemplate<String, String> redisTemplate;
 
